@@ -1,0 +1,14 @@
+[Unit]
+Description=Light laptop activity logging
+
+[Service]
+ExecStart=/usr/local/bin/lapmon -o /var/log -ss 30 -wi 30
+Restart=always
+User=root
+WorkingDirectory=/usr/local/bin 
+LimitNOFILES=65535
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

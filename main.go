@@ -1,8 +1,10 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/hanymamdouh82/lapmon/internal/screen"
@@ -10,41 +12,37 @@ import (
 )
 
 func main() {
-	outputDir := "/home/hany/monitor" // adjust
-	os.MkdirAll(outputDir, 0755)
+	// cli flags
+	outputDir := flag.String("o", "/var/log", "Logs output directory. Default: /var/log")
+	ttSS := flag.Int("ss", 30, "Screenshot time interval in seconds")
+	ttWI := flag.Int("wi", 30, "Window information time interval in seconds")
+	flag.Parse()
 
-	tickerScreenshot := time.NewTicker(5 * time.Second)
-	tickerWindow := time.NewTicker(2 * time.Second)
+	// Paths
+	date := time.Now().Format("2006-01-02")
+	screenshotPath := filepath.Join(*outputDir, "screenshots", date)
+	winlogPath := filepath.Join(*outputDir, "winlog")
+	os.MkdirAll(*outputDir, 0755)
+	os.MkdirAll(screenshotPath, 0755)
+	os.MkdirAll(winlogPath, 0755)
+
+	// Tickers
+	tickerScreenshot := time.NewTicker(time.Duration(*ttSS) * time.Second)
+	tickerWindow := time.NewTicker(time.Duration(*ttWI) * time.Second)
 	// tickerHistory := time.NewTicker(5 * time.Second)
 
 	for {
 		select {
 		case <-tickerScreenshot.C:
-			err := screen.TakeScreenshot(outputDir)
+			err := screen.TakeScreenshot(screenshotPath)
 			if err != nil {
-				log.Println("Screenshot error:", err)
+				log.Println("Screenshot error: ", err)
 			}
 
 		case <-tickerWindow.C:
-			win, err := windows.GetActiveWindow()
-			_ = win
-			if err != nil {
-				log.Fatal(err)
+			if err := windows.LogActiveWindow(winlogPath); err != nil {
+				log.Println("Window Information error: ", err)
 			}
-			// fmt.Printf("[WINDOW] %s @ %s\n", win.Title, win.Time.Format(time.RFC3339))
-
-			// case <-tickerHistory.C:
-			// 	// entries, err := history.ReadChromeHistory("/home/hany/.config/google-chrome/Default/History")
-			// 	// entries, err := history.ReadChromeHistory("/home/hany/.mozilla/firefox/ogeekpml.default-release/places.sqlite")
-			// 	entries, err := history.ReadChromeHistory()
-			// 	if err != nil {
-			// 		log.Fatal(err)
-			// 	}
-			// 	for _, entry := range entries {
-			// 		_ = entry
-			// 		// fmt.Printf("[HISTORY] %s | %s @ %s\n", entry.Title, entry.URL, entry.VisitAt)
-			// 		fmt.Println(entry)
-			// 	}
 		}
 	}
 }

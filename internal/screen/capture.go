@@ -19,7 +19,7 @@ func TakeScreenshot(outputDir string) error {
 	}
 
 	now := time.Now().Format("2006-01-02_15-04-05")
-	filename := filepath.Join(outputDir, "screnshots", fmt.Sprintf("screenshot_%s.png", now))
+	filename := filepath.Join(outputDir, "", fmt.Sprintf("screenshot_%s.png", now))
 
 	file, err := os.Create(filename)
 	if err != nil {
