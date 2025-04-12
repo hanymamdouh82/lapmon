@@ -1,14 +1,15 @@
 [Unit]
 Description=Light laptop activity logging
+After=graphical-session.target
 
 [Service]
 ExecStart=/usr/local/bin/lapmon -o /var/log -ss 30 -wi 30
 Restart=always
-User=root
 WorkingDirectory=/usr/local/bin 
-LimitNOFILES=65535
 StandardOutput=journal
 StandardError=journal
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
